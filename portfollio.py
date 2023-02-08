@@ -6,15 +6,21 @@ from numpy.random import exponential
 import matplotlib.pyplot as plt
 from math import isnan
 from math import exp, log
-from scipy.optimize import LinearConstraint
+import loadData
+from cppfct import c_Variancecontrib
 
 
 class Portfollio():
 
-    def __init__(self, data, n) -> None:
-        self.data = data
-        self.n = n
-        self.dailyReturns = (-self.data.pct_change().
+    def __init__(self, begin, b, end, e, stocks, crypto, step) -> None:
+        self.step = step
+        self.loader = loadData.Loader(stocks, crypto, begin, end, b, e, step)
+        self.data = self.loader.PriceDate(begin, end)
+        self.n = len(self.loader.price.columns) - 1
+        self.stocks = stocks
+        self.crypto = crypto
+
+        self.dailyReturns = (-self.data[self.stocks + self.crypto].pct_change().
                              dropna(axis=0,
                              how='any',
                              inplace=False))
@@ -23,6 +29,22 @@ class Portfollio():
         self.max = max(temp) * 253
         self.min = min(temp) * 253
         print("range = " + str(self.min) + " ; " + str(self.max))
+        self.npCov = pd.DataFrame.to_numpy(self.cov)
+
+        self.bases = np.ones(self.n)
+
+    def ChangeWindow(self, begin, end):
+        self.data = self.loader.PriceDate(begin, end)
+        self.n = len(self.loader.price.columns) - 1
+        self.dailyReturns = (-self.data[self.stocks + self.crypto].pct_change().
+                             dropna(axis=0,
+                             how='any',
+                             inplace=False))
+        self.cov = self.dailyReturns.cov()
+        temp = np.mean(self.dailyReturns)
+        self.max = max(temp) * 253
+        self.min = min(temp) * 253
+        self.npCov = pd.DataFrame.to_numpy(self.cov)
 
     def optimize(self, method, target=0):
         if(method == "minVarT"):
@@ -53,15 +75,16 @@ class Portfollio():
                                           bounds=bounds,
                                           constraints=constraints)
             self.weights = max_sharpe_results.x
-        elif(method == "equalRisk"):  # max diversification
-            a = np.ones(self.n)
-            temp = 0
-            print(self.data.tail(1))
-            for i in range(self.n):
-                a[i] = self.data.iloc[-1][i]
-                temp += self.data.iloc[-1][i]
-            a /= temp
-            self.weights = a
+        elif(method == "maxDiv"):
+            constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+            bounds = tuple((0, 1) for i in range(self.n))
+            min_sd_results = minimize(fun=self.maxContrib,
+                                      x0=self.equalWeights(),
+                                      method='SLSQP',
+                                      bounds=bounds,
+                                      constraints=constraints,
+                                      tol=10**-10)
+            self.weights = min_sd_results.x
         elif(method == "equalWeights"):
             self.weights = np.ones(self.n) * (1/self.n)
         elif(method == "minVar"):
@@ -74,6 +97,8 @@ class Portfollio():
                                       constraints=constraints,
                                       tol=10**-10)
             self.weights = min_sd_results.x
+        elif(method == "equalRiisk"):
+            pass
         else:
             raise "Wrong objective"
 
@@ -99,21 +124,24 @@ class Portfollio():
 
     def evaluate(self, weight, date):
         a = []
-        temp = pd.DataFrame.to_numpy(self.data)
+        temp = pd.DataFrame.to_numpy(self.data[self.crypto + self.stocks])
         for i in range(self.n):
-            if not isnan(temp[(self.data.index[-1] - 1 - date)[0]][i] / temp[-1][i]):
-                a.append(temp[(self.data.index[-1] - 1 - date)[0]][i] / temp[-1][i])
+            if not isnan(temp[(self.data.index[-1]  - date)[0]][i] /  temp[0][i]):
+                a.append(temp[(self.data.index[-1]  - date)[0]][i] / temp[0][i])
             else:
                 a.append(0)
         return np.dot(weight, a)
 
-    def plot(self, date1, date2, weight=[]):
-        if weight == []:
-            weight = self.weights
+    def plot(self, date1, date2, weights=[]):
+        plt.plot(range((date2-date1)[0]), self.evalVect(date1, date2, weights))
+
+    def evalVect(self, date1, date2, weights=[]):
+        if weights == []:
+            weights = self.weights
         a = np.ones((date2 - date1)[0])
         for i in range((date2 - date1)[0]):
-            a[i] = (self.evaluate(weight, date1 + i))
-        plt.plot(range((date2-date1)[0]), a)
+            a[i] = (self.evaluate(weights, date1 + i))
+        return np.flip(a)
 
     def effiscientFrontier(self):
         target = np.linspace(start=self.min,
@@ -129,24 +157,27 @@ class Portfollio():
         return Frontier
 
     def KeyN(self, key):
-        for i, n in enumerate(self.data):
+        for i, n in enumerate(self.data[self.stocks + self.crypto]):
             if n == key:
                 return i
+        print(key)
         raise "error"
 
-    def W(self, i):
-        a = np.zeros(self.n)
-        a[i] = self.weights[i]
+    def W(self, i, weights=[]):
+        if weights == []:
+            weights = self.weights
+        a = np.zeros(len(weights))
+        a[i] = weights[i]
         return a
 
-    def Variancecontrib(self, key):
-        return (np.transpose(self.W(self.KeyN(key))) @ (self.cov @
-                self.W(self.KeyN(key))) /
-                (np.transpose(self.weights) @ (self.cov) @ self.weights))
+    def Variancecontrib(self, key, weights=[]):
+        if weights == []:
+            weights = self.weights
+        return c_Variancecontrib(self.W(self.KeyN(key), weights), weights, self.npCov)
 
     def RiskEntropy(self):
         H = 0
-        for i in self.data:
+        for i in self.data[self.crypto + self.stocks]:
             H += -self.Variancecontrib(i) * log(self.Variancecontrib(i))
         return -exp(H)
 
@@ -156,48 +187,5 @@ class Portfollio():
             H += -self.weights[i] * log(self.weights[i])
         return -exp(H)
 
-    def minTEPtf(self, A, b1, b2, lb, ub,
-                 wBench,
-                 lVol=0,
-                 uTE=1,
-                 is_risk_adapt=False,
-                 adapt_vol=1,
-                 adapt_te=1000):
-        n = self.cov.shape[0]
-        init_guess = np.repeat(1/n, n)
-        bounds = np.concatenate((lb, ub), axis=1)
-        bounds = tuple(map(tuple, bounds))
-        linear_ineq = LinearConstraint(A, b1, b2)
-        if is_risk_adapt:
-            bench_vol = self.portfolio_sd(self.weights)
-            lVol_ = (1 - adapt_vol) * bench_vol
-            uTE_ = adapt_te * bench_vol
-        else:
-            lVol_ = lVol
-            uTE_ = uTE
-
-        vol_min = {
-            'type': 'ineq',
-            'args': (self.cov,),
-            'fun': lambda weights, matCov:
-                self.portfolio_sd(self.weights)-lVol_
-        }
-        te_max = {
-            'type': 'ineq',
-            'args': (self.cov, wBench),
-            'fun': lambda weights, matCov, wBench:
-                    -(self.portfolio_sd(self.weights - wBench)-uTE_)
-        }
-
-        constraints = (
-            linear_ineq,
-            vol_min,
-            te_max
-        )
-        weights = minimize(self.portfolio_sd(self.weights - wBench),
-                           init_guess,
-                           args=(self.cov, wBench), method='SLSQP',
-                           options={'disp': False},
-                           constraints=constraints,
-                           bounds=bounds)
-        return weights.x
+    def maxContrib(self, weights):
+        return max([self.Variancecontrib(i, weights) for i in self.data[self.stocks + self.crypto]])
