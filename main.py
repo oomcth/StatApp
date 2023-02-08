@@ -6,15 +6,15 @@ from datetime import date
 import pandas as pd
 import datetime
 from robot import Robot
-from cppfct import dateIndex
+from cppfct import dateIndex, dateToDatetime
 import matplotlib.pyplot as plt
 
 demo = False
 
 end = '2022-12-30'
-e = date(2022, 12, 30)
-begin = '2019-12-30'
-b = date(2019, 12, 30)
+e = dateToDatetime(end)
+begin = '2021-12-30'
+b = dateToDatetime(begin)
 
 
 if(demo):

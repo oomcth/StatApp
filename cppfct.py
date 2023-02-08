@@ -14,6 +14,10 @@ def c_Variancecontrib(w1, weights, cov):
 def dateTimeToDate(date):
     return str(date.year) + "-" + str(date.month) + "-" + str(date.day)
 
+def dateToDatetime(date):
+    temp = str.split(date, " ")[0]
+    temp2 = str.split(temp, "-")
+    return datetime.date(int(temp2[0]), int(temp2[1]), int(temp2[2]))
 
 @numba.njit
 def c_isNan(vect):
