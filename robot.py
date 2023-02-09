@@ -1,5 +1,4 @@
 import portfollio
-import numba
 import datetime
 from cppfct import dateTimeToDate
 import matplotlib.pyplot as plt

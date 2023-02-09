@@ -19,7 +19,6 @@ class Portfollio():
         self.n = len(self.loader.price.columns) - 1
         self.stocks = stocks
         self.crypto = crypto
-
         self.dailyReturns = (-self.data[self.stocks + self.crypto].pct_change().
                              dropna(axis=0,
                              how='any',
@@ -75,7 +74,7 @@ class Portfollio():
                                           bounds=bounds,
                                           constraints=constraints)
             self.weights = max_sharpe_results.x
-        elif(method == "maxDiv"):
+        elif(method == "equalRisk"):
             constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
             bounds = tuple((0, 1) for i in range(self.n))
             min_sd_results = minimize(fun=self.maxContrib,
@@ -97,8 +96,16 @@ class Portfollio():
                                       constraints=constraints,
                                       tol=10**-10)
             self.weights = min_sd_results.x
-        elif(method == "equalRiisk"):
-            pass
+        elif(method == "equalRisk111"):
+            a = np.zeros(self.n)
+            for n, i in enumerate(self.stocks + self.crypto):
+                if n == 0:
+                    a[0] = 1
+                else:
+                    a[n] = self.npCov[0][0] / self.npCov[n][n]
+            s = sum(a)
+            self.weights = [i / s for i in a]
+            print(sum(self.weights))
         else:
             raise "Wrong objective"
 

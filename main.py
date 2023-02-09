@@ -9,7 +9,7 @@ from robot import Robot
 from cppfct import dateIndex, dateToDatetime
 import matplotlib.pyplot as plt
 
-demo = False
+demo = True
 
 end = '2022-12-30'
 e = dateToDatetime(end)
@@ -18,10 +18,10 @@ b = dateToDatetime(begin)
 
 
 if(demo):
-    portfollio = Portfollio(begin, b, end, e, stocks, crypto, "1d")
+    portfollio = Portfollio(begin, b, end, e, stocks, crypto, "1wk")
 
     target1 = 1
-    portfollio.optimize("maxDiv", target1)
+    portfollio.optimize("sharpRatio", target1)
 
     temp = pd.DataFrame.to_numpy(portfollio.loader.price)
 

@@ -2,7 +2,7 @@ import pandas as pd
 import yfinance as yf
 from data import stocks, crypto
 from datetime import timedelta
-from cppfct import c_isNan
+from cppfct import c_isNan, contains
 import numpy as np
 from datetime import date
 
@@ -16,7 +16,7 @@ class Loader:
         self.price = pd.DataFrame.empty
 
 # Stocks
-        if not(stocks == []):
+        if not(self.stocks == []):
             dataL = []
 
             for i in self.stocks:
@@ -27,7 +27,6 @@ class Loader:
                     dataL.append(df)
                 else:
                     self.stocks.remove(i)
-                    raise "a"
             all_data = dataL[0]
 
             for i in range(1, len(dataL)):
@@ -38,7 +37,7 @@ class Loader:
             self.vol = self.time_serie(self.alldata, "Close")
 
 # Cryptos
-        if not(crypto == []):
+        if not(self.crypto == []):
             dataL = []
 
             for i in self.crypto:
@@ -48,9 +47,10 @@ class Loader:
                 if not c_isNan(np.array(df['Close'])):
                     dataL.append(df)
                 else:
-                    self.stocks.remove(i)
-                    raise "a"
+                    self.crypto.remove(i)
             all_data = dataL[0]
+
+            print(self.crypto)
 
             for i in range(1, len(dataL)):
                 all_data = pd.concat([all_data, dataL[i]])
@@ -60,7 +60,7 @@ class Loader:
             self.tempVol = self.time_serie(self.alldata, "Close")
 
             if self.price is not pd.DataFrame.empty:
-                for i in crypto:
+                for i in self.crypto:
                     self.price[i] = self.tempPrice[i]
                     self.vol[i] = self.tempVol[i]
             else:

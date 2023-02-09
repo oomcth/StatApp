@@ -27,8 +27,15 @@ def c_isNan(vect):
         return False
 
 
+def contains(arr, el):
+    for i in arr:
+        if i == el:
+            return True
+    return False
+
+
 def dateIndex(df, date, t=0):
-    if t == 4:
+    if t == 14:
         raise "error"
     if not(list((df[df['Date'] == date].index.values)) == []):
         return df[df['Date'] == date].index.values
