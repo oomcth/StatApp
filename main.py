@@ -2,18 +2,16 @@
 from portfollio import Portfollio
 import matplotlib.pyplot as plt
 from data import stocks, crypto
-from datetime import date
 import pandas as pd
-import datetime
 from robot import Robot
 from cppfct import dateIndex, dateToDatetime
-import matplotlib.pyplot as plt
 
-demo = True
+
+demo = False
 
 end = '2022-12-30'
 e = dateToDatetime(end)
-begin = '2021-12-30'
+begin = '2021-01-01'
 b = dateToDatetime(begin)
 
 
@@ -37,15 +35,15 @@ if(demo):
     plt.show()
 
 else:
-    robot = Robot(begin, b, end, e, stocks, crypto, "1d")
+    robot = Robot(begin, b, end, e, stocks, crypto, "1wk")
 
     robot.setStep("3month")
 
-    robot.setStrategie("maxDiv")
+    robot.setStrategie("sharpRatio")
     robot.RUN(begin, b, end, e)
     robot.plot()
 
-    robot.setStrategie("sharpRatio")
+    robot.setStrategie("equalRisk")
     robot.RUN(begin, b, end, e)
     robot.plot()
 
@@ -57,8 +55,12 @@ else:
     robot.RUN(begin, b, end, e)
     robot.plot()
 
+    robot.setStrategie("maxDiv")
+    robot.RUN(begin, b, end, e)
+    robot.plot()
+
     print(robot.portfollio.data.columns)
 
-    plt.legend("1234")
+    plt.legend("12345")
 
     robot.show()
