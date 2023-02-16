@@ -32,7 +32,10 @@ class Loader:
                 dataL.append(df)
 
                 # vérifie l'intégrité des données. ie. qu'elle ne contienne pas de NaN
-                if (not c_isNan(np.array(df['Close']))) or not(drop):
+                temp = (not c_isNan(np.array(df['Close'])))
+                if not(drop):
+                    temp = True
+                if temp:
 
                     # harmonise les dates entre les différents actifs et change leur format en Date
                     df.reset_index(inplace=True)
