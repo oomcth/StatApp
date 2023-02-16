@@ -13,7 +13,7 @@ import numpy as np
 
 class Loader:
 
-    def __init__(self, stocks, crypto, begin, end, b, e, step) -> None:
+    def __init__(self, stocks, crypto, begin, end, b, e, step, drop=True) -> None:
         self.step = step  # fréquence des données. exemple 1wk = weekly
         self.price = pd.DataFrame.empty  # DataFrame final des prix
         self.vol = pd.DataFrame.empty  # DataFrame final des volumes
@@ -32,7 +32,7 @@ class Loader:
                 dataL.append(df)
 
                 # vérifie l'intégrité des données. ie. qu'elle ne contienne pas de NaN
-                if not c_isNan(np.array(df['Close'])):
+                if (not c_isNan(np.array(df['Close']))) or not(drop):
 
                     # harmonise les dates entre les différents actifs et change leur format en Date
                     df.reset_index(inplace=True)
