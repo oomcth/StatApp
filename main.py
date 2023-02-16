@@ -7,7 +7,7 @@ from robot import Robot
 from cppfct import dateIndex, dateToDatetime
 
 
-demo = False
+demo = True
 
 end = '2022-12-30'
 e = dateToDatetime(end)
@@ -30,6 +30,8 @@ if(demo):
     portfollio.plot(dateIndex(portfollio.data, rbegin),
                     dateIndex(portfollio.data, rend))
     plt.show()
+
+    portfollio.info()
 
     f = portfollio.effiscientFrontier()
     plt.plot([i[2] for i in f], [i[1] for i in f])

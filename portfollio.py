@@ -5,7 +5,6 @@
 import pandas as pd
 from scipy.optimize import minimize
 import numpy as np
-from numpy.random import exponential
 import matplotlib.pyplot as plt
 from math import isnan
 from math import exp, log
@@ -39,8 +38,8 @@ class Portfollio():
                              inplace=False))
         self.cov = self.dailyReturns.cov()  # matrice de covariance
         temp = np.mean(self.dailyReturns)  # calcul les rendements moyen par actifs
-        self.max = max(temp) # rendement maximal
-        self.min = min(temp) # rendement minimal
+        self.max = max(temp)  # rendement maximal
+        self.min = min(temp)  # rendement minimal
 
         # affiche les rendements extrémal
         print("range = " + str(self.min) + " ; " + str(self.max))
@@ -209,7 +208,7 @@ class Portfollio():
         print(key)
         raise "error"
 
-    # retourne un vecteur ou toute les valeur sont nulle sauf la valeur i qui 
+    # retourne un vecteur ou toute les valeur sont nulle sauf la valeur i qui
     # correspond au poid de l'actif i
     def W(self, i, weights=[]):
         if weights == []:
@@ -257,3 +256,9 @@ class Portfollio():
     # calcul l'opposé du diversification ratio
     def neg_DR(self, weights):
         return -self.DR(weights)
+
+    def info(self):
+        print("assets :", self.loader.price.columns[0:len(self.loader.price.columns) - 2])
+        print("weights :", self.weights)
+        print("return : ", self.portfolio_returns(self.weights))
+        print("sd : ", self.portfolio_sd(self.weights))
