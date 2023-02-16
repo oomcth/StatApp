@@ -139,7 +139,7 @@ class Portfollio():
 
     # rendements du portefeuille
     def portfolio_returns(self, weights):
-        return (np.dot(self.dailyReturns.mean(), weights)) * 253
+        return (np.dot(self.dailyReturns.mean(), weights))
 
     # retourne la variance du portefeuille
     def portfolio_sd(self, weights):
@@ -162,8 +162,8 @@ class Portfollio():
         a = []
         temp = pd.DataFrame.to_numpy(self.data[self.all])
         for i in range(self.n):
-            if not isnan(temp[(self.data.index[-1] - date)[0]][i] / temp[0][i]):
-                a.append(temp[(self.data.index[-1] - date)[0]][i] / temp[0][i])
+            if not isnan(temp[(self.data.index[-1] - 1 - date)[0]][i] / temp[0][i]):
+                a.append(temp[(self.data.index[-1] - 1 - date)[0]][i] / temp[0][i])
             else:
                 return 0
         return np.dot(weight, a)
@@ -171,7 +171,6 @@ class Portfollio():
     # plot la valeur du portefeuille au cours du temps
     def plot(self, date1, date2, weights=[]):
         temp = self.evalVect(date1, date2, weights)
-        print(temp)
         plt.plot(range(len(temp)), temp)
 
     # calcul la valeur du portefeuille au cours du temps
@@ -199,7 +198,7 @@ class Portfollio():
             Frontier.append((self.weights,
                              self.portfolio_returns(self.weights),
                              self.portfolio_sd(self.weights)))
-        Frontier = np.array(Frontier)
+        Frontier = np.array(Frontier, dtype='object')
         return Frontier
 
     # retourne le numéro de colonne correspondant à un actif

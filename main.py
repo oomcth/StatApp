@@ -11,7 +11,7 @@ demo = False
 
 end = '2022-12-30'
 e = dateToDatetime(end)
-begin = '2021-01-01'
+begin = '2019-12-30'
 b = dateToDatetime(begin)
 
 
@@ -19,7 +19,8 @@ if(demo):
     portfollio = Portfollio(begin, b, end, e, stocks, crypto, "1wk")
 
     target1 = 1
-    portfollio.optimize("sharpRatio", target1)
+    portfollio.optimize("equalRisk", target1)
+    print(portfollio.weights, sum(portfollio.weights))
 
     temp = pd.DataFrame.to_numpy(portfollio.loader.price)
 

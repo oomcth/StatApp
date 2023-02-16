@@ -87,4 +87,4 @@ if __name__ == "__main__":
     begin = '2021-01-01'
     b = dateToDatetime(begin)
     loader = Loader(stocks, crypto, begin, end, b, e, "1wk")
-    print(loader.PriceDate(begin, end))
+    print(type(loader.price))

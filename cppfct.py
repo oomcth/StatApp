@@ -23,6 +23,7 @@ def dateTimeToDate(date):
 
 
 # converti un Date en dateTime
+
 def dateToDatetime(date):
     temp = str.split(date, " ")[0]
     temp2 = str.split(temp, "-")
