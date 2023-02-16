@@ -32,11 +32,10 @@ class Loader:
                 dataL.append(df)
 
                 # vérifie l'intégrité des données. ie. qu'elle ne contienne pas de NaN
-                temp = (not c_isNan(np.array(df['Close'])))
+                temp = (len(df["Close"]) == len(dataL[0]["Close"]))
                 if not(drop):
                     temp = True
                 if temp:
-
                     # harmonise les dates entre les différents actifs et change leur format en Date
                     df.reset_index(inplace=True)
                     df['Date'] = pd.to_datetime(df['Date']).dt.date
@@ -44,7 +43,6 @@ class Loader:
                     if n != 0:
                         df['Date'] = dataL[0]['Date']
                 else:
-
                     # si il y a une erreur dans les données, supprime l'actif du projet
                     self.all.remove(i)
             all_data = dataL[0]
@@ -87,7 +85,7 @@ class Loader:
 if __name__ == "__main__":
     end = '2022-12-30'
     e = dateToDatetime(end)
-    begin = '2021-01-01'
+    begin = '2018-01-01'
     b = dateToDatetime(begin)
-    loader = Loader(stocks, crypto, begin, end, b, e, "1wk")
-    print(type(loader.price))
+    loader = Loader(stocks, crypto, begin, end, b, e, "1wk", drop=True)
+    print(loader.price)

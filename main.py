@@ -7,7 +7,7 @@ from robot import Robot
 from cppfct import dateIndex, dateToDatetime
 
 
-demo = True
+demo = False
 
 end = '2022-12-30'
 e = dateToDatetime(end)
