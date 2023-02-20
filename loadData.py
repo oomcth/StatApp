@@ -53,7 +53,7 @@ class Loader:
             self.alldata = all_data
 
             self.price = self.time_serie(self.alldata, "Close")
-            self.vol = self.time_serie(self.alldata, "Close")
+            self.vol = self.time_serie(self.alldata, "Volume")
 
     # retourne le dataFrame finale correspondant à l'entrée name : Close / Vol par exemple
     def time_serie(self, data, name):
