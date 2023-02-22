@@ -26,6 +26,8 @@ if sys.argv[1] != 'help':
 
     portfollio.plot(dateIndex(portfollio.data, rbegin),
                     dateIndex(portfollio.data, rend))
+    print(portfollio.evalVect(dateIndex(portfollio.data, rbegin),
+                              dateIndex(portfollio.data, rend)))
     plt.show()
 
     portfollio.info()
@@ -39,4 +41,3 @@ else:
     print("input 3 : end of time windiw : y-m-d")
     print("input 4 : portfollio strategy")
     print("strategies are : {sharpRatio, equalRisk, equalWeights, maxDiv, minVar}")
-    

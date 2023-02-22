@@ -7,9 +7,9 @@ from robot import Robot
 from cppfct import dateIndex, dateToDatetime
 
 
-demo = False
+demo = True
 
-end = '2022-12-30'
+end = '2021-12-30'
 e = dateToDatetime(end)
 begin = '2019-12-30'
 b = dateToDatetime(begin)
@@ -18,9 +18,10 @@ b = dateToDatetime(begin)
 if(demo):
     portfollio = Portfollio(begin, b, end, e, stocks, crypto, "1wk")
 
-    target1 = 1
-    portfollio.optimize("equalRisk", target1)
+    target1 = 0.001
+    portfollio.optimize("minVar", target1)
     print(portfollio.weights, sum(portfollio.weights))
+    print(portfollio.portfolio_returns())
 
     temp = pd.DataFrame.to_numpy(portfollio.loader.price)
 
@@ -33,9 +34,9 @@ if(demo):
 
     portfollio.info()
 
-    f = portfollio.effiscientFrontier()
-    plt.plot([i[2] for i in f], [i[1] for i in f])
-    plt.show()
+    # f = portfollio.effiscientFrontier()
+    # plt.plot([i[2] for i in f], [i[1] for i in f])
+    # plt.show()
 
 else:
     robot = Robot(begin, b, end, e, stocks, crypto, "1wk")

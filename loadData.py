@@ -14,11 +14,14 @@ import numpy as np
 class Loader:
 
     def __init__(self, stocks, crypto, begin, end, b, e, step, drop=True) -> None:
+        self.begin = b
+        self.end = e
         self.step = step  # fréquence des données. exemple 1wk = weekly
         self.price = pd.DataFrame.empty  # DataFrame final des prix
         self.vol = pd.DataFrame.empty  # DataFrame final des volumes
         self.all = stocks + crypto  # Liste des actifs étudiés
-
+        self.curr = dict([])
+        print(self.all)
         if not(self.all == []):
             dataL = []
 
@@ -29,12 +32,15 @@ class Loader:
                 # stoque le nom des actifs dans le dataFrame
                 df['Symbol'] = i
 
+                self.curr[i] = yf.Ticker(i).fast_info['currency']
+
                 dataL.append(df)
 
                 # vérifie l'intégrité des données. ie. qu'elle ne contienne pas de NaN
                 temp = (len(df["Close"]) == len(dataL[0]["Close"]))
-                if not(drop):
+                if not(drop) or n==0:
                     temp = True
+                temp = True
                 if temp:
                     # harmonise les dates entre les différents actifs et change leur format en Date
                     df.reset_index(inplace=True)
@@ -53,7 +59,9 @@ class Loader:
             self.alldata = all_data
 
             self.price = self.time_serie(self.alldata, "Close")
-            self.vol = self.time_serie(self.alldata, "Volume")
+            self.vol = self.time_serie(all_data, "Volume")
+            self.changecurrency()
+
 
     # retourne le dataFrame finale correspondant à l'entrée name : Close / Vol par exemple
     def time_serie(self, data, name):
@@ -80,6 +88,12 @@ class Loader:
         return self.vol[self.all + ['Date']].loc[(self.vol['Date'] >= date1) &
                                                  (self.vol['Date'] <= date2)]
 
+    def changecurrency(self):
+        for key in self.all:
+            if self.curr[key] != 'EUR':
+                self.price[key] = np.array(self.price[key]) * np.array(yf.Ticker("EUR" + self.curr[key] + "=X").history(start=self.begin,
+                                                                                                                        end=self.end+timedelta(days=1),
+                                                                                                                        interval=self.step)['Close'])
 
 # fonction de debugage
 if __name__ == "__main__":

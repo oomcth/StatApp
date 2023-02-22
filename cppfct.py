@@ -31,7 +31,6 @@ def dateToDatetime(date):
 
 
 # renvoie s'il existe un NaN dans un vecteur
-@numba.njit
 def c_isNan(vect):
     for i in vect:
         if isnan(i):
@@ -63,3 +62,10 @@ def strnextd(s):
                 int(str.split(s, "-")[1]),
                 int(str.split(s, "-")[2])) + datetime.timedelta(days=1)
     return dateTimeToDate(d)
+
+
+# renvoie la date au format string additionné d'un certain nombre de jours
+def datestringdiff(date, days):
+    temp = dateToDatetime(date)
+    temp += datetime.timedelta(days=days)
+    return dateTimeToDate(temp)

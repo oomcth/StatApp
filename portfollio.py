@@ -9,25 +9,25 @@ import matplotlib.pyplot as plt
 from math import isnan
 from math import exp, log
 import loadData
-from cppfct import c_Variancecontrib
+from cppfct import c_Variancecontrib, dateIndex, datestringdiff
 
 
 class Portfollio():
 
     def __init__(self, begin, b, end, e, stocks, crypto, step) -> None:
-
+        self.begin = begin
+        self.end = end
         self.step = step  # fréquence des données. exemple 1wk = weekly
 
         # classe loader qui charge les données
         self.loader = loadData.Loader(stocks, crypto, begin, end, b, e, step)
-
         # données utilisées par la classe selon la fenetre de temps choisie
         self.data = self.loader.PriceDate(begin, end)
 
         # vérifie l'intégrité des données
         if self.data.isnull().values.any():
             print("attention présence de NaN")
-
+        print(self.loader.price)
         self.n = len(self.loader.price.columns) - 1  # nombre d'actifs
         self.all = self.loader.all   # liste des actifs
 
@@ -50,6 +50,8 @@ class Portfollio():
     # Change la fenetre de temps sur laquelle se base le portefeuille
     # fonctions analogues à innit
     def ChangeWindow(self, begin, end):
+        self.begin = begin
+        self.end = end
         self.data = self.loader.PriceDate(begin, end)
         self.n = len(self.loader.price.columns) - 1
         self.dailyReturns = (-self.data[self.all].pct_change().
@@ -115,6 +117,8 @@ class Portfollio():
 
         # minimise la variance du portefeuille
         elif(method == "minVar"):
+            print(self.n)
+            print(self.cov.shape)
             constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
             bounds = tuple((0, 1) for i in range(self.n))
             self.weights = minimize(fun=self.portfolio_sd,
@@ -137,8 +141,17 @@ class Portfollio():
             raise "Wrong objective"
 
     # rendements du portefeuille
-    def portfolio_returns(self, weights):
-        return (np.dot(self.dailyReturns.mean(), weights))
+    def portfolio_returns(self, weights=[]):
+        if weights == []:
+            weights = self.weights
+        a = []
+        temp = pd.DataFrame.to_numpy(self.data[self.all])
+        for i in range(self.n):
+            if not isnan(temp[0][i]):
+                a.append(temp[-1][i] / temp[0][i] - 1)
+            else:
+                return 0
+        return (np.dot(weights, a) ** (1/len(self.data.index))) - 1
 
     # retourne la variance du portefeuille
     def portfolio_sd(self, weights):
@@ -258,7 +271,7 @@ class Portfollio():
         return -self.DR(weights)
 
     def info(self):
-        print("assets :", self.loader.price.columns[0:len(self.loader.price.columns) - 2])
+        print("assets :", self.loader.price.columns)
         print("weights :", self.weights)
         print("return : ", self.portfolio_returns(self.weights))
         print("sd : ", self.portfolio_sd(self.weights))
