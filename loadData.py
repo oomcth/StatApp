@@ -9,6 +9,7 @@ from data import stocks, crypto
 from datetime import timedelta
 from cppfct import c_isNan, dateToDatetime
 import numpy as np
+import data
 
 
 class Loader:
@@ -95,6 +96,9 @@ class Loader:
                                                                                                                         end=self.end+timedelta(days=1),
                                                                                                                         interval=self.step)['Close'])
 
+    def addExcel(self, loc):
+        pass
+
 # fonction de debugage
 if __name__ == "__main__":
     end = '2022-12-30'
@@ -102,4 +106,9 @@ if __name__ == "__main__":
     begin = '2018-01-01'
     b = dateToDatetime(begin)
     loader = Loader(stocks, crypto, begin, end, b, e, "1wk", drop=True)
-    print(loader.price)
+    for k in data.stocks + data.crypto:
+        if(loader.price[k].isnull().values.any()):
+            print(k)
+    temp = pd.DataFrame.to_numpy(loader.price[data.crypto + data.stocks])
+    for i in range(len(temp)):
+        print(temp[-1][i])
