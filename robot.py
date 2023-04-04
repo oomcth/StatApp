@@ -68,7 +68,7 @@ class Robot:
 
     # affiche la valeur du portefeuille du robot au cours du temps
     def plot(self):
-        plt.plot(range(len(self.eval) - 1), self.eval[1:])
+        plt.plot(range(len(self.eval) - 1), self.eval[2:])
 
     # affiche la valeur du portefeuille du robot au cours du temps
     def show(self):
