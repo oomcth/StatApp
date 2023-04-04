@@ -16,45 +16,37 @@ b = dateToDatetime(begin)
 
 
 if(demo):
-    portfollio = Portfollio(begin, b, end, e, stocks, crypto, "1wk")
-
+    portfollio = Portfollio(begin, b, end, e, stocks, crypto, "1wk", )
+    print(portfollio.npCov)
     target1 = 0.001
-    portfollio.optimize("equalWeights", 0.1)
-
+    portfollio.optimize("minVar", 0.1)
+    print(portfollio.weights)
     temp = pd.DataFrame.to_numpy(portfollio.loader.price)
 
     rbegin = str.split(str(temp[0][0]), " ")[0]
     rend = str.split(str(temp[-1][0]), " ")[0]
 
     portfollio.plot(dateIndex(portfollio.data, rbegin),
-                    dateIndex(portfollio.data, rend))
+                   dateIndex(portfollio.data, rend))
     portfollio.info()
+    portfollio.optimize("maxDiv", 0.1)
+    portfollio.plot(dateIndex(portfollio.data, rbegin),
+                   dateIndex(portfollio.data, rend))
     plt.show()
-    portfollio.plotAll()
+
+    # portfollio.plotAll()
 
 else:
-    robot = Robot(begin, b, end, e, stocks, crypto, "1wk")
+    tempCrypto = ['TM', 'TTE', 'BTC-EUR', 'ETH-EUR', 'XRP-EUR']
+
+    crypto2 = [str(i) for i in tempCrypto]
+
+    robot = Robot(begin, b, end, e, stocks, crypto2, "1wk")
 
     robot.setStep("3month")
-
     robot.setStrategie("sharpRatio")
     robot.RUN(begin, b, end, e)
-    robot.plot()
 
-    robot.setStrategie("equalRisk")
-    robot.RUN(begin, b, end, e)
-    robot.plot()
-
-    robot.setStrategie("equalWeights")
-    robot.RUN(begin, b, end, e)
-    robot.plot()
-
-    robot.setStrategie("minVar")
-    robot.RUN(begin, b, end, e)
-    robot.plot()
-
-    robot.setStrategie("maxDiv")
-    robot.RUN(begin, b, end, e)
     robot.plot()
 
     print(robot.portfollio.data.columns)
