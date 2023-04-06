@@ -29,6 +29,9 @@ if(demo):
     portfollio.plot(dateIndex(portfollio.data, rbegin),
                    dateIndex(portfollio.data, rend))
     portfollio.info()
+    print(portfollio.AtRisk95() * 100, "%")
+#     print(portfollio.MDD(dateIndex(portfollio.data, rbegin),
+#                    dateIndex(portfollio.data, rend), portfollio.weights))
     portfollio.optimize("maxDiv", 0.1)
     portfollio.plot(dateIndex(portfollio.data, rbegin),
                    dateIndex(portfollio.data, rend))

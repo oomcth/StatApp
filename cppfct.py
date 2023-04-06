@@ -49,7 +49,7 @@ def contains(arr, el):
 # renvoie l'index dans le dataframe de la date la plus proche par excès de la date fournis en entrée
 def dateIndex(df, date, t=0):
     if t == 14:
-        raise "error"
+        raise "error +14"
     if not(list((df[df['Date'] == date].index.values)) == []):
         return df[df['Date'] == date].index.values
     else:

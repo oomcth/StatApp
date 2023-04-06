@@ -139,7 +139,7 @@ class Portfollio():
         else:
             raise "Wrong objective"
 
-    # rendements du portefeuille
+    # rendements quotidient du portefeuille
     def portfolio_returns(self, weights=[]):
         if weights == []:
             weights = self.weights
@@ -151,6 +151,14 @@ class Portfollio():
             else:
                 return 0
         return (np.dot(weights, a) ** (1/len(self.data.index))) - 1
+
+    def annual_returns(self, weights=[]):
+        if weights == []:
+            weights = self.weights
+        return (1 + self.portfolio_returns(weights))**52.1786 - 1
+
+    def annual_sd(self, weights):
+        return self.portfolio_sd(weights) * 52
 
     # retourne la variance du portefeuille
     def portfolio_sd(self, weights):
@@ -268,6 +276,22 @@ class Portfollio():
     # calcul l'opposé du diversification ratio
     def neg_DR(self, weights):
         return -self.DR(weights)
+
+    def DD(self, date1, date2, weigths=[]):
+        if weigths == []:
+            weigths = self.weights
+        val = self.evalVect(date1, date2, weigths)
+        return (max(val) - val[-1]) / max(val)
+
+    def MDD(self, date1, date2, weigths=[]):
+        if weigths == []:
+            weigths = self.weights
+        return -100 * max([self.DD(date1, a, weigths) for a in range(int(date1)+1, int(date2))])
+
+    def AtRisk95(self, weights=[]):
+        if weights == []:
+            weights = self.weights
+        return self.annual_returns(weights) - 1.65 * self.annual_returns(weights)
 
     def info(self):
         print("assets :", self.all)

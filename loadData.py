@@ -97,8 +97,10 @@ class Loader:
                                                                                                                         interval=self.step)['Close'])
 
     def addExcel(self, loc, name):
-        xl = pd.ExcelFile(loc)
-        self.price[name] = xl.parse("prix", names=[name])
+        self.all += name
+        temp = pd.read_excel(loc,sheet_name='prix', usecols=name)
+        temp.index = self.price.index[0:len(temp.values)]
+        self.price[name] = temp
 
 # fonction de debugage
 if __name__ == "__main__":
@@ -110,5 +112,5 @@ if __name__ == "__main__":
     for k in data.stocks + data.crypto:
         if(loader.price[k].isnull().values.any()):
             print(k)
-    loader.addExcel("Classeur1.xlsx", "test")
+    loader.addExcel("Classeur1.xlsx", "A")
     print(loader.price)
