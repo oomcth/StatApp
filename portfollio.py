@@ -291,7 +291,7 @@ class Portfollio():
     def AtRisk95(self, weights=[]):
         if weights == []:
             weights = self.weights
-        return self.annual_returns(weights) - 1.65 * self.annual_returns(weights)
+        return self.annual_returns(weights) - 1.96 * self.annual_returns(weights)
 
     def info(self):
         print("assets :", self.all)
