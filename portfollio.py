@@ -150,7 +150,7 @@ class Portfollio():
                 a.append(temp[-1][i] / temp[0][i])
             else:
                 return 0
-        return (np.dot(weights, a) ** (1/len(self.data.index))) - 1
+        return (np.dot(weights, a)
 
     def annual_returns(self, weights=[]):
         if weights == []:
